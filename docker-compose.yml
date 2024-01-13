@@ -1,0 +1,40 @@
+version: '3.0'
+
+services:
+  app:
+    container_name: app
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${PG_DATABASE}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - ${PG_PORT}:5432
+    volumes:
+      - app-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      retries: 5
+    restart: always
+
+  payment:
+    container_name: payment
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${PAYMENT_PG_DATABASE}
+      - POSTGRES_USER=${PAYMENT_PG_USER}
+      - POSTGRES_PASSWORD=${PAYMENT_PG_PASSWORD}
+    ports:
+      - ${PAYMENT_PG_PORT}:5432
+    volumes:
+      - payment-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  app-volume:
+  payment-volume:
