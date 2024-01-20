@@ -6,32 +6,16 @@ import { isAuthenticated, validate } from '@/middlewares';
 
 const router = Router();
 
-router.post(
-	'/login',
-	validate(authValidations.loginRules),
-	authController.login
-);
+router.post('/login', validate(authValidations.loginRules), authController.login);
 
-router.post(
-	'/register',
-	validate(authValidations.registerRules),
-	authController.register
-);
+router.post('/register', validate(authValidations.registerRules), authController.register);
 
-router.post(
-	'/google',
-	validate(authValidations.googleAuthRules),
-	authController.googleAuth
-);
+router.post('/google', validate(authValidations.googleAuthRules), authController.googleAuth);
 
 router
 	.route('/me')
 	.get(isAuthenticated, authController.getCurrentUser)
-	.put(
-		isAuthenticated,
-		validate(authValidations.updateProfileRules),
-		authController.updateCurrentUser
-	)
+	.put(isAuthenticated, validate(authValidations.updateProfileRules), authController.updateCurrentUser)
 	.delete(isAuthenticated, authController.deleteCurrentUser);
 
 router.put(

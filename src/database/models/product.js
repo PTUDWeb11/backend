@@ -29,6 +29,12 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.STRING,
 				field: 'name',
 			},
+			slug: {
+				allowNull: false,
+				unique: true,
+				type: DataTypes.STRING,
+				field: 'slug',
+			},
 			price: {
 				allowNull: false,
 				type: DataTypes.FLOAT,
