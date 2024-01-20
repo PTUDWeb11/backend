@@ -8,7 +8,11 @@ export default (sequelize, DataTypes) => {
 		 * The `models/index` file will call this method automatically.
 		 */
 		static associate(models) {
-			// define association here
+			Product.belongsToMany(models.Category, {
+				through: 'ProductCategory',
+				foreignKey: 'productId',
+				as: 'categories',
+			});
 		}
 	}
 	Product.init(
@@ -42,10 +46,6 @@ export default (sequelize, DataTypes) => {
 			images: {
 				type: DataTypes.ARRAY(DataTypes.STRING),
 				field: 'images',
-			},
-			categoryIds: {
-				type: DataTypes.ARRAY(DataTypes.INTEGER),
-				field: 'category_ids',
 			},
 			createdAt: {
 				allowNull: false,

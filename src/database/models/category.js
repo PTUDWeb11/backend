@@ -8,7 +8,21 @@ export default (sequelize, DataTypes) => {
 		 * The `models/index` file will call this method automatically.
 		 */
 		static associate(models) {
-			// define association here
+			Category.hasMany(models.Category, {
+				foreignKey: 'parentId',
+				as: 'children',
+			});
+
+			Category.belongsTo(models.Category, {
+				foreignKey: 'parentId',
+				as: 'parent',
+			});
+
+			Category.belongsToMany(models.Product, {
+				through: 'ProductCategory',
+				foreignKey: 'categoryId',
+				as: 'products',
+			});
 		}
 	}
 	Category.init(
