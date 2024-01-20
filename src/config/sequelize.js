@@ -1,12 +1,6 @@
 import 'dotenv/config';
 
-const {
-	PG_HOST,
-	PG_PORT = 5432,
-	PG_DATABASE,
-	PG_USER,
-	PG_PASSWORD,
-} = process.env;
+const { PG_HOST, PG_PORT = 5432, PG_DATABASE, PG_USER, PG_PASSWORD, PG_SSL = false } = process.env;
 
 const defaultConfig = {
 	dialect: 'postgres',
@@ -20,6 +14,15 @@ const defaultConfig = {
 		paranoid: true,
 	},
 };
+
+if (PG_SSL) {
+	defaultConfig.dialectOptions = {
+		ssl: {
+			require: true,
+			rejectUnauthorized: false,
+		},
+	};
+}
 
 export const development = {
 	...defaultConfig,
