@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-const { PG_HOST, PG_PORT = 5432, PG_DATABASE, PG_USER, PG_PASSWORD, PG_SSL = false } = process.env;
+const { PG_HOST, PG_PORT = 5432, PG_DATABASE, PG_USER, PG_PASSWORD, PG_SSL = 'false' } = process.env;
 
 const defaultConfig = {
 	dialect: 'postgres',
@@ -15,7 +15,7 @@ const defaultConfig = {
 	},
 };
 
-if (PG_SSL) {
+if (PG_SSL == 'true') {
 	defaultConfig.dialectOptions = {
 		ssl: {
 			require: true,
