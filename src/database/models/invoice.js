@@ -26,13 +26,7 @@ export default (sequelize, DataTypes) => {
 				field: 'user_id',
 			},
 			status: {
-				type: DataTypes.ENUM(
-					'paying',
-					'processing',
-					'delivering',
-					'delivered',
-					'canceled'
-				),
+				type: DataTypes.ENUM('paying', 'processing', 'delivering', 'delivered', 'canceled'),
 			},
 			createdAt: {
 				allowNull: false,

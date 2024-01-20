@@ -4,6 +4,12 @@ import * as config from '@/config/sequelize';
 
 // import models
 import userModel from './models/user';
+import categoryModel from './models/category';
+import productModel from './models/product';
+import invoiceModel from './models/invoice';
+import invoiceItemModel from './models/invoice_item';
+import cartItemModel from './models/cart_item';
+import productCategoryModel from './models/product_category';
 
 // Configuration
 const env = process.env.NODE_ENV;
@@ -13,7 +19,15 @@ const sequelizeConfig = config[env];
 const sequelize = new Sequelize(sequelizeConfig);
 
 // Import all model files
-const modelDefiners = [userModel];
+const modelDefiners = [
+	userModel,
+	categoryModel,
+	productModel,
+	invoiceModel,
+	invoiceItemModel,
+	cartItemModel,
+	productCategoryModel,
+];
 
 // eslint-disable-next-line no-restricted-syntax
 for (const modelDefiner of modelDefiners) {
