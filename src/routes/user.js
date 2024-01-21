@@ -18,4 +18,14 @@ router.patch(
 	userController.changePassword
 );
 
+router
+	.route('/items')
+	.get(isAuthenticated, userController.getUserCartItems)
+	.post(isAuthenticated, validate(userValidations.addCartItemRules), userController.addCartItem);
+
+router
+	.route('/items/:item_id')
+	.patch(isAuthenticated, validate(userValidations.updateCartItemRules), userController.updateCartItem)
+	.delete(isAuthenticated, userController.deleteCartItem);
+
 export default router;
