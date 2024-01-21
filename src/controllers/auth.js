@@ -21,9 +21,7 @@ export const login = async (req, res, next) => {
 		// Find user by email address
 		const user = await db.models.User.findOne({ where: { email } });
 		if (!user) {
-			return next(
-				createError(400, 'There is no user with this email address!')
-			);
+			return next(createError(400, 'There is no user with this email address!'));
 		}
 
 		if (user.provider === 'google') {
@@ -66,10 +64,7 @@ export const register = async (req, res, next) => {
 			email: req.body.email,
 			password: req.body.password,
 			provider: 'email',
-			avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${md5(
-				req.body.email,
-				10
-			)}`,
+			avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${md5(req.body.email, 10)}`,
 		});
 
 		// Generate and return tokens
@@ -109,70 +104,6 @@ export const googleAuth = async (req, res, next) => {
 		return res.status(200).json({ token, refreshToken });
 	} catch (err) {
 		next(err);
-	}
-};
-/**
- * GET /auth/me
- * Get current user
- */
-export const getCurrentUser = async (req, res, next) => {
-	try {
-		delete req.user.dataValues.password;
-		res.json(req.user);
-	} catch (err) {
-		next(err);
-	}
-};
-
-/**
- * PUT /auth/me
- * Update current user
- */
-export const updateCurrentUser = async (req, res, next) => {
-	try {
-		await req.user.update(req.body, {
-			fields: ['firstName', 'lastName', 'email'],
-		});
-		res.status(200).json({ success: true });
-	} catch (err) {
-		next(err);
-	}
-};
-
-/**
- * DELETE /auth/me
- * Delete current user
- */
-export const deleteCurrentUser = async (req, res, next) => {
-	try {
-		await req.user.destroy();
-		res.status(204).send();
-	} catch (err) {
-		next(err);
-	}
-};
-
-/**
- * PUT /auth/me/password
- * Update password of current user
- */
-export const updatePassword = async (req, res, next) => {
-	try {
-		const { current, password } = req.body;
-
-		// Check user password
-		const isValidPassword = await req.user.validatePassword(current);
-		if (!isValidPassword) {
-			return next(createError(400, 'Incorrect password!'));
-		}
-
-		// Update password
-		req.user.password = password;
-		await req.user.save();
-
-		return res.json({ success: true });
-	} catch (err) {
-		return next(err);
 	}
 };
 

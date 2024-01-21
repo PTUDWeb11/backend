@@ -1,5 +1,6 @@
 import db from '@/database';
 import { tokenHelper } from '@/helpers';
+import createError from 'http-errors';
 
 export default async function authenticate(req, res, next) {
 	// Get authorization header from request
@@ -21,14 +22,14 @@ export default async function authenticate(req, res, next) {
 
 	// Extract token from header
 	const token = authorization.substring(7);
-	const tokenData = await tokenHelper.verifyToken(token);
+	const tokenData = tokenHelper.verifyToken(token);
 
 	// Find user from database
 	const user = await db.models.User.findByPk(tokenData.id).catch(() => null);
 
 	// Check if user exists
 	if (!user) {
-		return next({ status: 401, message: 'There is no user' });
+		return next(createError(401, 'There is no user'));
 	}
 
 	// Set request user
@@ -43,7 +44,7 @@ export default async function authenticate(req, res, next) {
 	// Check for refresh token and time left
 	if (refreshToken && minutes < 15) {
 		// Verify refresh token and get refresh token data
-		const refreshTokenData = await tokenHelper.verifyToken(refreshToken);
+		const refreshTokenData = tokenHelper.verifyToken(refreshToken);
 
 		// Check the user of refresh token
 		if (refreshTokenData.id === tokenData.id) {
