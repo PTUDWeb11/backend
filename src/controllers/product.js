@@ -108,3 +108,82 @@ export const searchProducts = async (req, res, next) => {
 		return next(err);
 	}
 };
+
+/**
+ * GET /products/:product_slug
+ * Get product by slug
+ */
+
+export const getProductBySlug = async (req, res, next) => {
+	try {
+		const { product_slug } = req.params;
+
+		// Find product by slug
+		const product = await db.models.Product.findOne({
+			where: { slug: product_slug },
+			include: [
+				{
+					model: db.models.Category,
+					as: 'categories',
+				},
+			],
+		});
+		if (!product) {
+			return next(createError(400, 'There is no product in the database!'));
+		}
+
+		return new Response(res).status(200).json(product);
+	} catch (err) {
+		return next(err);
+	}
+};
+
+/**
+ * GET /products/:product_slug/related
+ * Get related products
+ */
+
+export const getRelatedProducts = async (req, res, next) => {
+	try {
+		const { product_slug } = req.params;
+
+		// Find product by slug
+		const product = await db.models.Product.findOne({
+			where: { slug: product_slug },
+			include: [
+				{
+					model: db.models.Category,
+					as: 'categories',
+				},
+			],
+		});
+		if (!product) {
+			return next(createError(400, 'There is no product in the database!'));
+		}
+
+		// Find related products
+		const relatedProducts = await db.models.Product.findAll({
+			where: {
+				id: {
+					[db.Sequelize.Op.ne]: product.id,
+				},
+			},
+			limit: 10,
+			order: [['createdAt', 'ASC']],
+			include: [
+				{
+					model: db.models.Category,
+					as: 'categories',
+					where: { id: { [db.Sequelize.Op.in]: product.categories.map((category) => category.id) } },
+				},
+			],
+		});
+		if (!relatedProducts) {
+			return next(createError(400, 'There is no related product in the database!'));
+		}
+
+		return new Response(res).status(200).json(relatedProducts);
+	} catch (err) {
+		return next(err);
+	}
+};

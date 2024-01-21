@@ -12,4 +12,8 @@ router.get('/', validate(productValidations.getProductByCategoryRules), productC
 
 router.get('/search', validate(productValidations.searchProductRules), productController.searchProducts);
 
+router.get('/:product_slug', productController.getProductBySlug);
+
+router.get('/:product_slug/related', productController.getRelatedProducts);
+
 export default router;
