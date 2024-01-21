@@ -1,6 +1,7 @@
 import createError from 'http-errors';
 import db from '@/database';
 import * as pagination from '@/helpers/pagination';
+import Response from '@/views';
 
 /**
  * GET /products/main
@@ -10,7 +11,7 @@ export const getMainProducts = async (req, res, next) => {
 	try {
 		// Find 10 main products
 		const products = await db.models.Product.findAll({
-			limit: 10,
+			limit: 20,
 			order: [['createdAt', 'ASC']],
 			include: [
 				{
@@ -23,7 +24,7 @@ export const getMainProducts = async (req, res, next) => {
 			return next(createError(400, 'There is no main product in the database!'));
 		}
 
-		return res.status(200).json(products);
+		return new Response(res).status(200).json(products);
 	} catch (err) {
 		return next(err);
 	}
@@ -61,10 +62,7 @@ export const getProductsByCategory = async (req, res, next) => {
 			return next(createError(400, 'There is no product in the database!'));
 		}
 
-		return res.status(200).json({
-			meta: pagination.info(count, _limit, page),
-			products,
-		});
+		return new Response(res).status(200).meta(pagination.info(count, _limit, page)).json(products);
 	} catch (err) {
 		return next(err);
 	}
@@ -105,10 +103,7 @@ export const searchProducts = async (req, res, next) => {
 			return next(createError(400, 'There is no product in the database!'));
 		}
 
-		return res.status(200).json({
-			meta: pagination.info(count, _limit, page),
-			products,
-		});
+		return new Response(res).status(200).meta(pagination.info(count, _limit, page)).json(products);
 	} catch (err) {
 		return next(err);
 	}
