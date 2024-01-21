@@ -1,5 +1,6 @@
 import createError from 'http-errors';
 import db from '@/database';
+import Response from '@/views';
 
 /**
  * GET /categories/main
@@ -10,7 +11,6 @@ export const getMainCategories = async (req, res, next) => {
 		// Find 10 main categories, maximum 3 levels
 		const categories = await db.models.Category.findAll({
 			where: { parentId: null },
-			limit: 10,
 			order: [['createdAt', 'ASC']],
 			include: [
 				{
@@ -29,7 +29,7 @@ export const getMainCategories = async (req, res, next) => {
 			return next(createError(400, 'There is no main category in the database!'));
 		}
 
-		return res.status(200).json(categories);
+		return new Response(res).status(200).json(categories);
 	} catch (err) {
 		return next(err);
 	}
