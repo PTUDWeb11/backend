@@ -12,17 +12,4 @@ router.post('/register', validate(authValidations.registerRules), authController
 
 router.post('/google', validate(authValidations.googleAuthRules), authController.googleAuth);
 
-router
-	.route('/me')
-	.get(isAuthenticated, authController.getCurrentUser)
-	.put(isAuthenticated, validate(authValidations.updateProfileRules), authController.updateCurrentUser)
-	.delete(isAuthenticated, authController.deleteCurrentUser);
-
-router.put(
-	'/me/password',
-	isAuthenticated,
-	validate(authValidations.changePasswordRules),
-	authController.updatePassword
-);
-
 export default router;

@@ -23,6 +23,10 @@ class Response {
 		this.body.data = data;
 		return this.res.status(this.statusCode).json(this.body);
 	}
+
+	success() {
+		return this.res.status(200).json({ success: true });
+	}
 }
 
 export default Response;
