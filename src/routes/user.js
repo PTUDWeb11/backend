@@ -28,4 +28,9 @@ router
 	.patch(isAuthenticated, validate(userValidations.updateCartItemRules), userController.updateCartItem)
 	.delete(isAuthenticated, userController.deleteCartItem);
 
+router
+	.route('/invoices')
+	.get(isAuthenticated, validate(userValidations.getInvoicesRules), userController.getInvoices)
+	.post(isAuthenticated, userController.createInvoice); // buy cart items
+
 export default router;

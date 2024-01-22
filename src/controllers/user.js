@@ -1,6 +1,7 @@
 import createError from 'http-errors';
 import Response from '@/views';
 import db from '@/database';
+import * as pagination from '@/helpers/pagination';
 
 /**
  * GET /user/profile
@@ -183,6 +184,116 @@ export const deleteCartItem = async (req, res, next) => {
 		await item.destroy();
 
 		return new Response(res).success();
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * GET /user/invoices
+ * Get user invoices
+ */
+export const getInvoices = async (req, res, next) => {
+	try {
+		const { page = 1, limit = 10 } = req.query;
+		const { _offset, _limit } = pagination.cal(limit, page);
+
+		const { rows: invoices, count } = await db.models.Invoice.findAndCountAll({
+			where: { userId: req.user.id },
+			distinct: true,
+			include: [
+				{
+					model: db.models.InvoiceItem,
+					as: 'items',
+				},
+			],
+			offset: _offset,
+			limit: _limit,
+		});
+
+		return new Response(res).status(200).meta(pagination.info(count, _limit, page)).json(invoices);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * POST /user/invoices
+ * Create invoice
+ */
+export const createInvoice = async (req, res, next) => {
+	try {
+		// Get cart items
+		const items = await db.models.CartItem.findAll({
+			where: { userId: req.user.id },
+			include: [
+				{
+					model: db.models.Product,
+					as: 'product',
+				},
+			],
+		});
+
+		// Check if the cart is empty
+		if (items.length === 0) {
+			return next(createError(400, 'The cart is empty!'));
+		}
+
+		// Check if the quantity is greater than the product quantity
+		const invalidItems = items.filter((item) => item.quantity > item.product.quantity);
+		if (invalidItems.length > 0) {
+			return next(createError(400, 'There is no enough product in the stock!'));
+		}
+
+		// Transaction
+		const invoice = await db.transaction(async (t) => {
+			// Create invoice
+			const invoice = await db.models.Invoice.create(
+				{
+					userId: req.user.id,
+					status: 'paying',
+					totalPrice: items.reduce((total, item) => total + item.product.price * item.quantity, 0),
+					items: items.map((item) => ({
+						productId: item.productId,
+						quantity: item.quantity,
+						pricePerUnit: item.product.price,
+					})),
+				},
+				{
+					include: [
+						{
+							model: db.models.InvoiceItem,
+							as: 'items',
+						},
+					],
+					transaction: t,
+				}
+			);
+
+			// Delete cart items
+			await db.models.CartItem.destroy(
+				{
+					where: { userId: req.user.id },
+				},
+				{ transaction: t }
+			);
+
+			// Update product quantity
+			await Promise.all(
+				items.map((item) =>
+					item.product.update(
+						{
+							quantity: item.product.quantity - item.quantity,
+						},
+						{ transaction: t }
+					)
+				)
+			);
+
+			return invoice;
+		});
+
+		return new Response(res).status(201).json(invoice);
 	} catch (err) {
 		next(err);
 	}
