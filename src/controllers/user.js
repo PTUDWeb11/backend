@@ -2,6 +2,7 @@ import createError from 'http-errors';
 import Response from '@/views';
 import db from '@/database';
 import * as pagination from '@/helpers/pagination';
+import { generateId } from '@/helpers/id';
 
 /**
  * GET /user/profile
@@ -258,6 +259,7 @@ export const createInvoice = async (req, res, next) => {
 						quantity: item.quantity,
 						pricePerUnit: item.product.price,
 					})),
+					code: generateId(),
 				},
 				{
 					include: [

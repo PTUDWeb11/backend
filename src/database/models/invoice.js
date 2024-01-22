@@ -29,6 +29,12 @@ export default (sequelize, DataTypes) => {
 				type: DataTypes.FLOAT,
 				field: 'total_price',
 			},
+			code: {
+				allowNull: false,
+				unique: true,
+				type: DataTypes.STRING,
+				field: 'code',
+			},
 			createdAt: {
 				allowNull: false,
 				defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
