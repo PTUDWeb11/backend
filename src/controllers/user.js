@@ -300,3 +300,104 @@ export const createInvoice = async (req, res, next) => {
 		next(err);
 	}
 };
+
+/**
+ * GET /user/invoices/:invoice_code
+ * Get invoice
+ */
+export const getInvoice = async (req, res, next) => {
+	try {
+		const { invoice_code } = req.params;
+
+		const invoice = await db.models.Invoice.findOne({
+			where: { code: invoice_code, userId: req.user.id },
+			include: [
+				{
+					model: db.models.InvoiceItem,
+					as: 'items',
+					include: [
+						{
+							model: db.models.Product,
+							as: 'product',
+							include: [
+								{
+									model: db.models.Category,
+									as: 'categories',
+								},
+							],
+						},
+					],
+				},
+			],
+		});
+		if (!invoice) {
+			return next(createError(400, 'There is no invoice in the database!'));
+		}
+
+		return new Response(res).status(200).json(invoice);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * DELETE /user/invoices/:invoice_code
+ * Cancel invoice
+ */
+export const cancelInvoice = async (req, res, next) => {
+	try {
+		const { invoice_code } = req.params;
+
+		// Find invoice by code
+		const invoice = await db.models.Invoice.findOne({
+			where: { code: invoice_code, userId: req.user.id },
+			include: [
+				{
+					model: db.models.InvoiceItem,
+					as: 'items',
+					include: [
+						{
+							model: db.models.Product,
+							as: 'product',
+						},
+					],
+				},
+			],
+		});
+		if (!invoice) {
+			return next(createError(400, 'There is no invoice in the database!'));
+		}
+
+		// Check if the invoice is already paid
+		if (invoice.status !== 'paying') {
+			return next(createError(400, 'Paid or canceled invoice cannot be canceled!'));
+		}
+
+		// Transaction
+		await db.transaction(async (t) => {
+			// Update product quantity
+			await Promise.all(
+				invoice.items.map((item) =>
+					item.product.update(
+						{
+							quantity: item.product.quantity + item.quantity,
+						},
+						{ transaction: t }
+					)
+				)
+			);
+
+			// Update invoice status
+			await invoice.update(
+				{
+					status: 'canceled',
+				},
+				{ transaction: t }
+			);
+		});
+
+		return new Response(res).success();
+	} catch (err) {
+		next(err);
+	}
+};

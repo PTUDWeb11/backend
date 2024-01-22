@@ -33,4 +33,8 @@ router
 	.get(isAuthenticated, validate(userValidations.getInvoicesRules), userController.getInvoices)
 	.post(isAuthenticated, userController.createInvoice); // buy cart items
 
+router
+	.get('/invoices/:invoice_code', isAuthenticated, userController.getInvoice)
+	.delete('/invoices/:invoice_code', isAuthenticated, userController.cancelInvoice);
+
 export default router;
