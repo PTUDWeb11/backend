@@ -26,7 +26,7 @@ class Response {
 	}
 
 	success() {
-		return this.res.status(200).json({ success: true });
+		return this.res.status(this.statusCode).json({ success: true });
 	}
 }
 

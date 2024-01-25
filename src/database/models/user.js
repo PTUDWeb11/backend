@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
 	class User extends Model {
 		static associate(models) {}
 
-		generateToken(expiresIn = '1h') {
+		generateToken() {
 			const data = {
 				id: this.id,
 				email: this.email,
@@ -14,7 +14,7 @@ export default (sequelize, DataTypes) => {
 				isAdmin: this.isAdmin,
 				avatar: this.avatar,
 			};
-			return tokenHelper.generateToken(data, expiresIn);
+			return tokenHelper.generateToken(data);
 		}
 
 		validatePassword(plainPassword) {
