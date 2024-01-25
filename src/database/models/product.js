@@ -1,5 +1,6 @@
 'use strict';
 import { Model } from 'sequelize';
+
 export default (sequelize, DataTypes) => {
 	class Product extends Model {
 		/**
@@ -78,5 +79,6 @@ export default (sequelize, DataTypes) => {
 			tableName: 'products',
 		}
 	);
+
 	return Product;
 };

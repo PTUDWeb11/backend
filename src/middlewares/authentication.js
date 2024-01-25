@@ -51,7 +51,7 @@ export default async function authenticate(req, res, next) {
 			if (refreshTokenData.id === tokenData.id) {
 				// Generate new tokens
 				const newToken = user.generateToken();
-				const newRefreshToken = user.generateToken('2h');
+				const newRefreshToken = user.generateToken();
 
 				// Set response headers
 				res.setHeader('Token', newToken);
