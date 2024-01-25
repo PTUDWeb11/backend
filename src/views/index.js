@@ -1,6 +1,7 @@
 class Response {
 	constructor(res) {
 		this.res = res;
+		this.statusCode = 200;
 		this.body = {};
 	}
 
