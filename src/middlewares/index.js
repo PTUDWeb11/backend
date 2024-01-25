@@ -1,5 +1,5 @@
 import authenticationMiddleware from './authentication';
-import isAuthenticated from './isAuthenticated';
+import { isAuthenticated, isAuthorized } from './isAuthenticated';
 import validate from './validate';
 
-export { authenticationMiddleware, isAuthenticated, validate };
+export { authenticationMiddleware, isAuthenticated, isAuthorized, validate };
