@@ -45,3 +45,12 @@ export const updateCategoryRules = [
 ];
 
 export const deleteCategoryRules = [param('category_id').exists().isInt()];
+
+export const getInvoicesRules = [query('page').optional().isNumeric(), query('limit').optional().isNumeric()];
+
+export const getInvoiceRules = [param('invoice_id').exists().isInt()];
+
+export const updateInvoiceRules = [
+	param('invoice_id').exists().isInt(),
+	body('status').exists().isIn(['paying', 'processing', 'delivering', 'delivered', 'canceled']),
+];
