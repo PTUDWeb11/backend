@@ -41,4 +41,24 @@ router.use(
 	})()
 );
 
+router.use(
+	'/categories',
+	(function () {
+		const categoryRouter = Router();
+
+		categoryRouter
+			.route('/')
+			.get(validate(adminValidations.getCategoriesRules), adminController.getCategories)
+			.post(validate(adminValidations.createCategoryRules), adminController.createCategory);
+
+		categoryRouter
+			.route('/:category_id')
+			.get(validate(adminValidations.getCategoryRules), adminController.getCategory)
+			.patch(validate(adminValidations.updateCategoryRules), adminController.updateCategory)
+			.delete(validate(adminValidations.deleteCategoryRules), adminController.deleteCategory);
+
+		return categoryRouter;
+	})()
+);
+
 export default router;
