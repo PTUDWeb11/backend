@@ -8,7 +8,7 @@ import Response from '@/views';
  */
 export const getMainCategories = async (req, res, next) => {
 	try {
-		// Find 10 main categories, maximum 3 levels
+		// Find main categories, maximum 3 levels
 		const categories = await db.models.Category.findAll({
 			where: { parentId: null },
 			order: [['createdAt', 'ASC']],

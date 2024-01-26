@@ -4,7 +4,7 @@ import * as pagination from '@/helpers/pagination';
 import slugify from 'slugify';
 
 /**
- * GET /users/stats
+ * GET /admin/users/stats
  * Get user stats
  */
 export const getUserStats = async (req, res, next) => {
@@ -25,7 +25,7 @@ export const getUserStats = async (req, res, next) => {
 };
 
 /**
- * GET /products/stats
+ * GET /admin/products/stats
  * Get product stats
  */
 export const getProductStats = async (req, res, next) => {
@@ -46,7 +46,7 @@ export const getProductStats = async (req, res, next) => {
 };
 
 /**
- * GET /products
+ * GET /admin/products
  * Get products
  */
 export const getProducts = async (req, res, next) => {
@@ -72,7 +72,7 @@ export const getProducts = async (req, res, next) => {
 };
 
 /**
- * POST /products
+ * POST /admin/products
  * Create product
  */
 export const createProduct = async (req, res, next) => {
@@ -107,7 +107,7 @@ export const createProduct = async (req, res, next) => {
 };
 
 /**
- * GET /products/:product_id
+ * GET /admin/products/:product_id
  * Get product
  */
 export const getProduct = async (req, res, next) => {
@@ -134,7 +134,7 @@ export const getProduct = async (req, res, next) => {
 };
 
 /**
- * PUT /products/:product_id
+ * PUT /admin/products/:product_id
  * Update product
  */
 export const updateProduct = async (req, res, next) => {
@@ -176,7 +176,7 @@ export const updateProduct = async (req, res, next) => {
 };
 
 /**
- * DELETE /products/:product_id
+ * DELETE /admin/products/:product_id
  * Delete product
  */
 export const deleteProduct = async (req, res, next) => {
@@ -186,6 +186,148 @@ export const deleteProduct = async (req, res, next) => {
 		// Delete product
 		await db.models.Product.destroy({
 			where: { id: product_id },
+		});
+
+		return new Response(res).success();
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * GET /admin/categories
+ * Get categories
+ */
+export const getCategories = async (req, res, next) => {
+	try {
+		const { limit, page } = req.query;
+		const { _offset, _limit } = pagination.cal(limit, page);
+
+		const { count, rows: categories } = await db.models.Category.findAndCountAll({
+			offset: _offset,
+			limit: _limit,
+			include: [
+				{
+					model: db.models.Category,
+					as: 'parent',
+				},
+			],
+		});
+
+		return new Response(res).meta(pagination.info(count, _limit, page)).json(categories);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * POST /admin/categories
+ * Create category
+ */
+export const createCategory = async (req, res, next) => {
+	try {
+		const { name, image, parent_id } = req.body;
+
+		// Create category
+		const category = await db.models.Category.create({
+			name,
+			slug: slugify(name, { lower: true, remove: /[*+~.()'"!:@]/g }),
+			image,
+			parentId: parent_id,
+		});
+
+		return new Response(res).status(201).json(category);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * GET /admin/categories/:category_id
+ * Get category
+ */
+export const getCategory = async (req, res, next) => {
+	try {
+		const { category_id } = req.params;
+
+		const category = await db.models.Category.findByPk(category_id, {
+			include: [
+				{
+					model: db.models.Category,
+					as: 'parent',
+				},
+			],
+		});
+
+		if (!category) {
+			return new Response(res).status(404).message('Category not found').json();
+		}
+
+		return new Response(res).json(category);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * PATCH /admin/categories/:category_id
+ * Update category
+ */
+export const updateCategory = async (req, res, next) => {
+	try {
+		const { category_id } = req.params;
+		const { name, image } = req.body;
+
+		// Find category
+		const category = await db.models.Category.findByPk(category_id);
+		if (!category) {
+			return new Response(res).status(404).message('Category not found').json();
+		}
+
+		// Update category
+		await category.update({
+			name,
+			image,
+		});
+
+		return new Response(res).json(category);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * DELETE /admin/categories/:category_id
+ * Delete category
+ */
+export const deleteCategory = async (req, res, next) => {
+	try {
+		const { category_id } = req.params;
+
+		// Find category
+		const category = await db.models.Category.findByPk(category_id);
+		if (!category) {
+			return new Response(res).status(404).message('Category not found').json();
+		}
+
+		// Find child categories
+		const childCategories = await db.models.Category.findAll({
+			where: { parent_id: category_id },
+		});
+
+		// Transaction
+		await db.transaction(async (t) => {
+			// Delete category
+			await category.destroy({ transaction: t });
+
+			// Delete child categories
+			await Promise.all(childCategories.map((childCategory) => childCategory.destroy({ transaction: t })));
+
+			// Delete product categories of those categories
+			await db.models.ProductCategory.destroy({
+				where: { categoryId: [...childCategories.map((childCategory) => childCategory.id), category_id] },
+				transaction: t,
+			});
 		});
 
 		return new Response(res).success();

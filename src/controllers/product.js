@@ -9,7 +9,7 @@ import Response from '@/views';
  */
 export const getMainProducts = async (req, res, next) => {
 	try {
-		// Find 10 main products
+		// Find 20 main products
 		const products = await db.models.Product.findAll({
 			limit: 20,
 			order: [['createdAt', 'ASC']],

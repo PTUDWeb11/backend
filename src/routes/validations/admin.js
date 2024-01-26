@@ -28,3 +28,20 @@ export const updateProductRules = [
 ];
 
 export const deleteProductRules = [param('product_id').exists().isInt()];
+
+export const getCategoriesRules = [query('page').optional().isNumeric(), query('limit').optional().isNumeric()];
+
+export const createCategoryRules = [
+	body('name').exists().isString().isLength({ min: 3, max: 255 }),
+	body('image').optional().isURL(),
+];
+
+export const getCategoryRules = [param('category_id').exists().isInt()];
+
+export const updateCategoryRules = [
+	param('category_id').exists().isInt(),
+	body('name').optional().isString().isLength({ min: 3, max: 255 }),
+	body('image').optional().isURL(),
+];
+
+export const deleteCategoryRules = [param('category_id').exists().isInt()];
