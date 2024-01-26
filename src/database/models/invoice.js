@@ -2,13 +2,9 @@
 import { Model } from 'sequelize';
 export default (sequelize, DataTypes) => {
 	class Invoice extends Model {
-		/**
-		 * Helper method for defining associations.
-		 * This method is not a part of Sequelize lifecycle.
-		 * The `models/index` file will call this method automatically.
-		 */
 		static associate(models) {
-			// define association here
+			this.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+			this.hasMany(models.InvoiceItem, { foreignKey: 'invoiceId', as: 'items' });
 		}
 	}
 	Invoice.init(
@@ -27,6 +23,17 @@ export default (sequelize, DataTypes) => {
 			},
 			status: {
 				type: DataTypes.ENUM('paying', 'processing', 'delivering', 'delivered', 'canceled'),
+			},
+			totalPrice: {
+				allowNull: false,
+				type: DataTypes.FLOAT,
+				field: 'total_price',
+			},
+			code: {
+				allowNull: false,
+				unique: true,
+				type: DataTypes.STRING,
+				field: 'code',
 			},
 			createdAt: {
 				allowNull: false,
