@@ -61,4 +61,20 @@ router.use(
 	})()
 );
 
+router.use(
+	'/invoices',
+	(function () {
+		const invoiceRouter = Router();
+
+		invoiceRouter.get('/', validate(adminValidations.getInvoicesRules), adminController.getInvoices);
+
+		invoiceRouter
+			.route('/:invoice_id')
+			.get(validate(adminValidations.getInvoiceRules), adminController.getInvoice)
+			.patch(validate(adminValidations.updateInvoiceRules), adminController.updateInvoice);
+
+		return invoiceRouter;
+	})()
+);
+
 export default router;

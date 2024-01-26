@@ -335,3 +335,90 @@ export const deleteCategory = async (req, res, next) => {
 		next(err);
 	}
 };
+
+/**
+ * GET /admin/invoices
+ * Get invoices
+ */
+export const getInvoices = async (req, res, next) => {
+	try {
+		const { limit, page } = req.query;
+		const { _offset, _limit } = pagination.cal(limit, page);
+
+		const { count, rows: invoices } = await db.models.Invoice.findAndCountAll({
+			offset: _offset,
+			limit: _limit,
+			include: [
+				{
+					model: db.models.User,
+					as: 'user',
+				},
+			],
+		});
+
+		return new Response(res).meta(pagination.info(count, _limit, page)).json(invoices);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * GET /admin/invoices/:invoice_id
+ * Get invoice
+ */
+export const getInvoice = async (req, res, next) => {
+	try {
+		const { invoice_id } = req.params;
+
+		const invoice = await db.models.Invoice.findByPk(invoice_id, {
+			include: [
+				{
+					model: db.models.User,
+					as: 'user',
+				},
+				{
+					model: db.models.InvoiceItem,
+					as: 'items',
+					include: [
+						{
+							model: db.models.Product,
+							as: 'product',
+						},
+					],
+				},
+			],
+		});
+
+		if (!invoice) {
+			return new Response(res).status(404).message('Invoice not found').json();
+		}
+
+		return new Response(res).json(invoice);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * PATCH /admin/invoices/:invoice_id
+ * Update invoice
+ */
+export const updateInvoice = async (req, res, next) => {
+	try {
+		const { invoice_id } = req.params;
+		const { status } = req.body;
+
+		// Find invoice
+		const invoice = await db.models.Invoice.findByPk(invoice_id);
+		if (!invoice) {
+			return new Response(res).status(404).message('Invoice not found').json();
+		}
+
+		// Update invoice
+		await invoice.update({ status });
+
+		return new Response(res).json(invoice);
+	} catch (err) {
+		next(err);
+	}
+};
