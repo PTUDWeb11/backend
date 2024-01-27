@@ -25,6 +25,45 @@ export const getUserStats = async (req, res, next) => {
 };
 
 /**
+ * GET /admin/users
+ * Get users
+ */
+export const getUsers = async (req, res, next) => {
+	try {
+		const { limit, page } = req.query;
+		const { _offset, _limit } = pagination.cal(limit, page);
+
+		const { count, rows: users } = await db.models.User.findAndCountAll({
+			offset: _offset,
+			limit: _limit,
+		});
+
+		return new Response(res).meta(pagination.info(count, _limit, page)).json(users);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * DELETE /admin/users/:user_id
+ * Delete user
+ */
+export const deleteUser = async (req, res, next) => {
+	try {
+		const { user_id } = req.params;
+
+		// Delete user
+		await db.models.User.destroy({
+			where: { id: user_id },
+		});
+
+		return new Response(res).success();
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
  * GET /admin/products/stats
  * Get product stats
  */

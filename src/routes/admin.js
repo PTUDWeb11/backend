@@ -15,6 +15,10 @@ router.use(
 
 		userRouter.get('/stats', adminController.getUserStats);
 
+		userRouter.get('/', validate(adminValidations.getUsersRules), adminController.getUsers);
+
+		userRouter.delete('/:user_id', validate(adminValidations.deleteUserRules), adminController.deleteUser);
+
 		return userRouter;
 	})()
 );
