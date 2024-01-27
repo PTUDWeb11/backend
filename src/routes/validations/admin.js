@@ -1,5 +1,9 @@
 import { body, query, param } from 'express-validator';
 
+export const getUsersRules = [query('page').optional().isNumeric(), query('limit').optional().isNumeric()];
+
+export const deleteUserRules = [param('user_id').exists().isInt()];
+
 export const getProductsRules = [query('page').optional().isNumeric(), query('limit').optional().isNumeric()];
 
 export const createProductRules = [
