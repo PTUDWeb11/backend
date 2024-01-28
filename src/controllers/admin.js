@@ -193,7 +193,6 @@ export const updateProduct = async (req, res, next) => {
 			await product.update(
 				{
 					name,
-					slug: slugify(name, { lower: true, remove: /[*+~.()'"!:@]/g }),
 					description,
 					price,
 					quantity,
