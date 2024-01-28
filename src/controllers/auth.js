@@ -79,6 +79,9 @@ export const register = async (req, res, next) => {
 export const googleAuth = async (req, res, next) => {
 	try {
 		const { code, redirectUri } = req.body;
+
+		console.log('redirectUri: ', redirectUri);
+
 		const userInfo = await verifyCode(code, redirectUri);
 		const user = await db.models.User.findOne({
 			where: { email: userInfo.email },
@@ -112,7 +115,7 @@ async function verifyCode(code, redirectUri) {
 	let { tokens } = await client.getToken(code);
 	client.setCredentials({ access_token: tokens.access_token });
 
-	console.log(redirectUri);
+	console.log('redirectUri: ', redirectUri);
 
 	client.redirectUri = redirectUri;
 	const userinfo = await client.request({
