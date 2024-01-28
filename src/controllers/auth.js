@@ -112,11 +112,11 @@ export const googleAuth = async (req, res, next) => {
 
 // Call this function to validate OAuth2 authorization code sent from client-side
 async function verifyCode(code, redirectUri) {
-	client.setCredentials({ access_token: tokens.access_token });
 	client.redirectUri = redirectUri;
 	console.log('redirectUri 2: ', redirectUri);
 
 	let { tokens } = await client.getToken(code);
+	client.setCredentials({ access_token: tokens.access_token });
 
 	const userinfo = await client.request({
 		url: 'https://www.googleapis.com/oauth2/v3/userinfo',
