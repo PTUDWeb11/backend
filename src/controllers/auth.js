@@ -111,6 +111,9 @@ export const googleAuth = async (req, res, next) => {
 async function verifyCode(code, redirectUri) {
 	let { tokens } = await client.getToken(code);
 	client.setCredentials({ access_token: tokens.access_token });
+
+	console.log(redirectUri);
+
 	client.redirectUri = redirectUri;
 	const userinfo = await client.request({
 		url: 'https://www.googleapis.com/oauth2/v3/userinfo',
