@@ -80,7 +80,7 @@ export const googleAuth = async (req, res, next) => {
 	try {
 		const { code, redirectUri } = req.body;
 
-		console.log('redirectUri: ', redirectUri);
+		console.log('redirectUri 1: ', redirectUri);
 
 		const userInfo = await verifyCode(code, redirectUri);
 		const user = await db.models.User.findOne({
@@ -112,12 +112,12 @@ export const googleAuth = async (req, res, next) => {
 
 // Call this function to validate OAuth2 authorization code sent from client-side
 async function verifyCode(code, redirectUri) {
-	let { tokens } = await client.getToken(code);
 	client.setCredentials({ access_token: tokens.access_token });
-
-	console.log('redirectUri: ', redirectUri);
-
 	client.redirectUri = redirectUri;
+	console.log('redirectUri 2: ', redirectUri);
+
+	let { tokens } = await client.getToken(code);
+
 	const userinfo = await client.request({
 		url: 'https://www.googleapis.com/oauth2/v3/userinfo',
 	});
