@@ -151,7 +151,7 @@ export const updateCartItem = async (req, res, next) => {
 		}
 
 		// Check if the quantity is greater than the product quantity
-		if (quantity > item.product.quantity) {
+		if (quantity > item.product?.quantity) {
 			return next(createError(400, 'There is no enough product in the stock!'));
 		}
 
@@ -253,11 +253,11 @@ export const createInvoice = async (req, res, next) => {
 				{
 					userId: req.user.id,
 					status: 'paying',
-					totalPrice: items.reduce((total, item) => total + item.product.price * item.quantity, 0),
+					totalPrice: items.reduce((total, item) => total + item.product?.price * item.quantity, 0),
 					items: items.map((item) => ({
 						productId: item.productId,
 						quantity: item.quantity,
-						pricePerUnit: item.product.price,
+						pricePerUnit: item.product?.price,
 					})),
 					code: generateId(),
 				},
@@ -283,9 +283,9 @@ export const createInvoice = async (req, res, next) => {
 			// Update product quantity
 			await Promise.all(
 				items.map((item) =>
-					item.product.update(
+					item.product?.update(
 						{
-							quantity: item.product.quantity - item.quantity,
+							quantity: item.product?.quantity - item.quantity,
 						},
 						{ transaction: t }
 					)
@@ -378,9 +378,9 @@ export const cancelInvoice = async (req, res, next) => {
 			// Update product quantity
 			await Promise.all(
 				invoice.items.map((item) =>
-					item.product.update(
+					item.product?.update(
 						{
-							quantity: item.product.quantity + item.quantity,
+							quantity: item.product?.quantity + item.quantity,
 						},
 						{ transaction: t }
 					)
