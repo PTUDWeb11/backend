@@ -241,7 +241,7 @@ export const createInvoice = async (req, res, next) => {
 		}
 
 		// Check if the quantity is greater than the product quantity
-		const invalidItems = items.filter((item) => item.quantity > item.product.quantity);
+		const invalidItems = items.filter((item) => item.quantity > item.product?.quantity);
 		if (invalidItems.length > 0) {
 			return next(createError(400, 'There is no enough product in the stock!'));
 		}
