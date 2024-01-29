@@ -254,11 +254,15 @@ export const createInvoice = async (req, res, next) => {
 					userId: req.user.id,
 					status: 'paying',
 					totalPrice: items.reduce((total, item) => total + item.product?.price * item.quantity, 0),
-					items: items.map((item) => ({
-						productId: item.productId,
-						quantity: item.quantity,
-						pricePerUnit: item.product?.price,
-					})),
+					items: items.map((item) => {
+						if (item.product) {
+							return {
+								productId: item.productId,
+								quantity: item.quantity,
+								pricePerUnit: item.product?.price,
+							};
+						}
+					}),
 					code: generateId(),
 				},
 				{
@@ -282,14 +286,16 @@ export const createInvoice = async (req, res, next) => {
 
 			// Update product quantity
 			await Promise.all(
-				items.map((item) =>
-					item.product?.update(
-						{
-							quantity: item.product?.quantity - item.quantity,
-						},
-						{ transaction: t }
-					)
-				)
+				items.map((item) => {
+					if (item.product) {
+						item.product.update(
+							{
+								quantity: item.product?.quantity - item.quantity,
+							},
+							{ transaction: t }
+						);
+					}
+				})
 			);
 
 			return invoice;
