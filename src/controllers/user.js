@@ -3,6 +3,8 @@ import Response from '@/views';
 import db from '@/database';
 import * as pagination from '@/helpers/pagination';
 import { generateId } from '@/helpers/id';
+import { paymentConfig } from '@/config';
+import { tokenHelper } from '@/helpers';
 
 /**
  * GET /user/profile
@@ -341,6 +343,66 @@ export const getInvoice = async (req, res, next) => {
 		}
 
 		return new Response(res).status(200).json(invoice);
+	} catch (err) {
+		next(err);
+	}
+};
+
+/**
+ * PATCH /user/invoices/:invoice_code
+ * Process invoice
+ */
+export const processInvoice = async (req, res, next) => {
+	try {
+		const { invoice_code } = req.params;
+
+		// Find invoice by code
+		const invoice = await db.models.Invoice.findOne({
+			where: { code: invoice_code, userId: req.user.id },
+			include: [
+				{
+					model: db.models.InvoiceItem,
+					as: 'items',
+					include: [
+						{
+							model: db.models.Product,
+							as: 'product',
+						},
+					],
+				},
+			],
+		});
+		if (!invoice) {
+			return next(createError(400, 'There is no invoice in the database!'));
+		}
+
+		// Check if the invoice is already paid
+		if (invoice.status !== 'paying') {
+			return next(createError(400, 'Paid or canceled invoice cannot be processed!'));
+		}
+
+		const token = tokenHelper.generatePaymentToken({
+			callback_url: `${paymentConfig.callbackUrl}/${invoice.code}`,
+			user_id: req.user.id,
+			amount: invoice.totalPrice,
+		});
+
+		// Call payment API here
+		const resp = await fetch(`${paymentConfig.endPoint}/transactions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ token }),
+		});
+
+		if (resp.status !== 200) {
+			return next(createError(400, 'Payment failed!'));
+		}
+
+		const data = await resp.json();
+
+		return new Response(res).json({ token: data.data.token });
 	} catch (err) {
 		next(err);
 	}

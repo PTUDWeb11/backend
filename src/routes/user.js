@@ -35,6 +35,7 @@ router
 
 router
 	.get('/invoices/:invoice_code', isAuthenticated, userController.getInvoice)
+	.patch('/invoices/:invoice_code', isAuthenticated, userController.processInvoice)
 	.delete('/invoices/:invoice_code', isAuthenticated, userController.cancelInvoice);
 
 export default router;
